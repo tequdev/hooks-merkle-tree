@@ -19,6 +19,14 @@
     *(uint64_t *)(buf + 24) = *(uint64_t *)(i + 24);                           \
   }
 
+#define COPY_UINT20(buf_raw, i)                                                \
+  {                                                                            \
+    unsigned char *buf = (unsigned char *)buf_raw;                             \
+    *(uint64_t *)(buf + 0) = *(uint64_t *)(i + 0);                             \
+    *(uint64_t *)(buf + 8) = *(uint64_t *)(i + 8);                             \
+    *(uint32_t *)(buf + 16) = *(uint32_t *)(i + 16);                           \
+  }
+
 int64_t hook(uint32_t reserved) {
 
   REQUIRE(otxn_type() == ttINVOKE, "Invalid transaction type");
@@ -48,9 +56,7 @@ int64_t hook(uint32_t reserved) {
 
   // leaf
   uint8_t leaf[LEAF_LENGTH];
-  for (int i = 0; GUARD(LEAF_LENGTH), i < LEAF_LENGTH; i++) {
-    leaf[i] = ptr[32 * PROOF_LENGTH + i]; // leaf
-  }
+  COPY_UINT20(leaf, ptr + 32 * PROOF_LENGTH);
 
   // hash = hash(leaf)
   uint8_t hash[32];
